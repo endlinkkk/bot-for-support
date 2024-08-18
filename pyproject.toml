@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "tgshka"
+version = "0.1.0"
+description = ""
+authors = ["Sergey <one6sergey@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiogram = "^3.12.0"
+pydantic-settings = "^2.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
