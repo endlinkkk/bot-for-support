@@ -30,6 +30,7 @@ async def set_chat_handler(message: Message, command: CommandObject) -> None:
     """
     This handler receives messages with `/set-chat` command
     """
+    
     await message.answer(text=f"{command.args}")
 
 
