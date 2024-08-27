@@ -11,3 +11,13 @@ class ChatListRequestError(ApplicationException):
     @property
     def message(self):
         return "Failed to get chat list"
+
+
+@dataclass(eq=False)
+class ListenerListRequestError(ApplicationException):
+    status_code: int
+    response_content: str
+
+    @property
+    def message(self):
+        return "Failed to get chat listeners"

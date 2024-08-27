@@ -24,13 +24,12 @@ async def get_all_chats_handler(message: Message) -> None:
         await message.answer(text=convert_chats_dtos_to_message(chats))
 
 
-
 @router.message(Command("set_chat"))
 async def set_chat_handler(message: Message, command: CommandObject) -> None:
     """
     This handler receives messages with `/set-chat` command
     """
-    
+
     await message.answer(text=f"{command.args}")
 
 

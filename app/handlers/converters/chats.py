@@ -1,4 +1,4 @@
-from ddtos.messages import ChatItemDTO
+from ddtos.messages import ChatItemDTO, ChatListenerDTO
 
 
 def convert_chats_dtos_to_message(chats: list[ChatItemDTO]) -> str:
@@ -11,3 +11,9 @@ def convert_chats_dtos_to_message(chats: list[ChatItemDTO]) -> str:
             ),
         )
     )
+
+
+def convert_chat_listener_response_to_listener_dto(
+    listener_data: dict,
+) -> ChatListenerDTO:
+    return ChatListenerDTO(oid=listener_data["oid"])

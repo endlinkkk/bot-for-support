@@ -9,10 +9,6 @@ from handlers.base import router as base_router
 from handlers.chats import router as chat_router
 from settings.config import get_settings
 
-# Bot token can be obtained via https://t.me/BotFather
-
-
-# All handlers should be attached to the Router (or Dispatcher)
 
 dp = Dispatcher()
 
