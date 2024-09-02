@@ -21,3 +21,24 @@ class ListenerListRequestError(ApplicationException):
     @property
     def message(self):
         return "Failed to get chat listeners"
+
+
+@dataclass(eq=False)
+class ListenerAddRequestError(ApplicationException):
+    status_code: int
+    response_content: str
+
+    @property
+    def message(self):
+        return "Failed to add chat listeners"
+
+
+
+@dataclass(eq=False)
+class ChatInfoRequestError(ApplicationException):
+    status_code: int
+    response_content: str
+
+    @property
+    def message(self):
+        return "Failed to get chat information"

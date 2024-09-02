@@ -4,9 +4,15 @@ from urllib.parse import urljoin
 from httpx import AsyncClient
 
 from ddtos.messages import ChatItemDTO, ChatListenerDTO
-from exceptions.chats import ChatListRequestError, ListenerListRequestError
+from exceptions.chats import (
+    ChatInfoRequestError,
+    ChatListRequestError,
+    ListenerAddRequestError,
+    ListenerListRequestError,
+)
 from handlers.converters.chats import convert_chat_listener_response_to_listener_dto
 from services.constants import (
+    CHAT_INFO_URI,
     CHAT_LIST_URI,
     CHAT_LISTENERS_URI,
     DEFAULT_LIMIT,
@@ -25,6 +31,12 @@ class BaseChatWebService(ABC):
 
     @abstractmethod
     async def get_chat_listeners(self, chat_oid: str) -> list[ChatListenerDTO]: ...
+
+    @abstractmethod
+    async def add_listener(self, telegram_chat_id: str, chat_oid: str): ...
+
+    @abstractmethod
+    async def get_chat_info(self, chat_oid: str) -> ChatListenerDTO: ...
 
 
 @dataclass
@@ -49,8 +61,8 @@ class ChatWebService(BaseChatWebService):
 
     async def get_chat_listeners(self, chat_oid: str) -> list[ChatListenerDTO]:
         response = await self.http_client.get(
-            url=urljoin(base=self.base_url, url=CHAT_LISTENERS_URI).format(
-                chat_oid=chat_oid
+            url=urljoin(
+                base=self.base_url, url=CHAT_LISTENERS_URI.format(chat_oid=chat_oid)
             )
         )
 
@@ -65,3 +77,34 @@ class ChatWebService(BaseChatWebService):
             convert_chat_listener_response_to_listener_dto(listener_data=listener_data)
             for listener_data in json_data
         ]
+
+    async def add_listener(self, telegram_chat_id: int, chat_oid: str):
+        response = await self.http_client.post(
+            url=urljoin(
+                base=self.base_url, url=CHAT_LISTENERS_URI.format(chat_oid=chat_oid)
+            ),
+            json={"telegram_chat_id": str(telegram_chat_id)},
+        )
+
+        if not response.is_success:
+            raise ListenerAddRequestError(
+                status_code=response.status_code,
+                response_content=response.content.decode(),
+            )
+        
+    async def get_chat_info(self, chat_oid: str) -> ChatListenerDTO:
+
+        response = await self.http_client.get(
+            url=urljoin(
+                base=self.base_url, url=CHAT_INFO_URI.format(chat_oid=chat_oid)
+            ),
+        )
+
+        if not response.is_success:
+            raise ChatInfoRequestError(
+                status_code=response.status_code,
+                response_content=response.content.decode(),
+            )
+        
+        return convert_chat_response_to_chat_dto(chat_data=response.json())
+
