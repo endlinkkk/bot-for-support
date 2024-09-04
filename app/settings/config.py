@@ -14,10 +14,11 @@ class Settings(BaseSettings):
         alias="WEB_API_BASE_URL", default="http://main-app:8000"
     )
     api_port: str = Field(alias="API_PORT", default="8010")
-    kafka_broker_url: str = Field(alias="KAFKA_BROKER_URL", default="http://kafka:29092")
-    new_message_topic: str = Field(alias="NEW_MESSAGE_TOPIC", default="new_messages")
+    kafka_broker_url: str = Field(
+        alias="KAFKA_BROKER_URL", default="http://kafka:29092"
+    )
+    new_message_topic: str = Field(alias="NEW_MESSAGE_TOPIC", default="new-messages")
     kafka_group_id: str = Field(alias="KAFKA_GROUP_ID", default="tg-bot")
-    
 
 
 def get_settings() -> Settings:

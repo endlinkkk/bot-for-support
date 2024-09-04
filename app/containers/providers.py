@@ -25,5 +25,5 @@ class MyProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def get_tg_bot(self) -> Bot:
         return Bot(
-            token=self.get_settings.api_token,
+            token=self.get_settings().api_token,
         )

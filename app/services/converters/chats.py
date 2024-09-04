@@ -10,5 +10,7 @@ def convert_chat_response_to_chat_dto(chat_data: dict) -> ChatItemDTO:
     )
 
 
-def conver_chat_listener_response_to_listener_dto(listener_data: dict) -> ChatListenerDTO:
-    return ChatListenerDTO(oid=listener_data['oid'])
+def conver_chat_listener_response_to_listener_dto(
+    listener_data: dict,
+) -> ChatListenerDTO:
+    return ChatListenerDTO(oid=listener_data["oid"])

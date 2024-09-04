@@ -33,7 +33,6 @@ class ListenerAddRequestError(ApplicationException):
         return "Failed to add chat listeners"
 
 
-
 @dataclass(eq=False)
 class ChatInfoRequestError(ApplicationException):
     status_code: int

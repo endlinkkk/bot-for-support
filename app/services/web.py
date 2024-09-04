@@ -91,9 +91,8 @@ class ChatWebService(BaseChatWebService):
                 status_code=response.status_code,
                 response_content=response.content.decode(),
             )
-        
-    async def get_chat_info(self, chat_oid: str) -> ChatListenerDTO:
 
+    async def get_chat_info(self, chat_oid: str) -> ChatListenerDTO:
         response = await self.http_client.get(
             url=urljoin(
                 base=self.base_url, url=CHAT_INFO_URI.format(chat_oid=chat_oid)
@@ -105,6 +104,5 @@ class ChatWebService(BaseChatWebService):
                 status_code=response.status_code,
                 response_content=response.content.decode(),
             )
-        
-        return convert_chat_response_to_chat_dto(chat_data=response.json())
 
+        return convert_chat_response_to_chat_dto(chat_data=response.json())
