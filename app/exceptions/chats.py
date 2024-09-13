@@ -52,3 +52,13 @@ class ListenerDeleteRequestError(ApplicationException):
     @property
     def message(self):
         return "Failed to delete chat listeners"
+    
+
+@dataclass(eq=False)
+class SendMessageRequestError(ApplicationException):
+    status_code: int
+    response_content: str
+
+    @property
+    def message(self):
+        return "Failed to send message in chat"

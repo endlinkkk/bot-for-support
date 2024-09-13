@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, ErrorEvent, ReplyKeyboardRemove
@@ -10,6 +11,7 @@ from containers.factories import get_container
 from handlers.converters.chats import convert_chats_dtos_to_message
 from services.web import BaseChatWebService
 from aiogram.fsm.state import State, StatesGroup
+
 
 
 router = Router()
@@ -54,8 +56,8 @@ async def set_chat_handler(
             await message.answer(f"Error setting up chat listener: {str(e)}")
             return
 
-        await state.update_data(chat_oid=chat_oid) # СОХРАНИЛИ CHAT_OID В КОНТЕКСТ
-        # TODO Сделать чтобы можно было повторно подключаться к чатам
+        await state.update_data(chat_oid=chat_oid)
+        # TODO Сделать кнопку выйти и удалить чат (при удалении чата все слушатели должны покинуть чат)
 
         await message.answer("Вы в чате. Чтобы выйти, нажмите кнопку.", reply_markup=keyboard)
         await state.set_state(ChatStates.listening)
@@ -72,22 +74,19 @@ async def handle_listening_messages(message: Message, state: FSMContext):
 
         if message.text == 'exit':
             await service.delete_listener(telegram_chat_id=message.chat.id, chat_oid=chat_oid)
-            await message.answer("Вы вышли из чата", reply_markup=ReplyKeyboardRemove())
+            await message.answer(f"Вы вышли из чата: {chat_oid}", reply_markup=ReplyKeyboardRemove())
 
 
             await state.clear()
         else:
-            await message.answer(f"Message sent: {message.text} to {chat_oid}")
-
-
-# @router.message(Command("exit_chat"))
-# async def exit_chat_handler(message: Message, state: FSMContext) -> None:
-#     current_state = await state.get_state()
-#     if current_state != ChatStates.listening:
-#         await message.answer("You are not currently in chat listening mode.")
-#         return
-#     await state.clear()
-#     await message.answer("Exited chat listening mode.")
+            await service.send_message_to_chat(chat_oid=chat_oid, message=message.text)
+            await message.answer(f"Message sent in chat: {chat_oid}\nMessage text: {message.text}")
+            await asyncio.sleep(0.5)
+            try:
+                await message.delete()
+            except Exception:
+                pass
+            
 
 
 @router.error(

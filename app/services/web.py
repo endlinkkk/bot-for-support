@@ -10,6 +10,7 @@ from exceptions.chats import (
     ListenerAddRequestError,
     ListenerDeleteRequestError,
     ListenerListRequestError,
+    SendMessageRequestError,
 )
 from handlers.converters.chats import convert_chat_listener_response_to_listener_dto
 from services.constants import (
@@ -19,6 +20,7 @@ from services.constants import (
     DEFAULT_LIMIT,
     DEFAULT_OFFSET,
     DELETE_LISTENER_URI,
+    SEND_MESSAGE_IN_CHAT_URI,
 )
 from services.converters.chats import convert_chat_response_to_chat_dto
 
@@ -42,6 +44,9 @@ class BaseChatWebService(ABC):
 
     @abstractmethod
     async def delete_listener(self, telegram_chat_id: str, chat_oid: str): ...
+
+    @abstractmethod
+    async def send_message_to_chat(self, chat_oid: str, message: str): ...
 
 
 @dataclass
@@ -124,3 +129,18 @@ class ChatWebService(BaseChatWebService):
                 status_code=response.status_code,
                 response_content=response.content.decode(),
             )
+
+    async def send_message_to_chat(self, chat_oid: str, message: str):
+        response = await self.http_client.post(
+            url=urljoin(
+                base=self.base_url, url=SEND_MESSAGE_IN_CHAT_URI.format(chat_oid=chat_oid)
+            ),
+            json={"text": message},
+        )
+
+        if not response.is_success:
+            raise SendMessageRequestError(
+                status_code=response.status_code,
+                response_content=response.content.decode(),
+            )
+        
