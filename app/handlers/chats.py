@@ -1,9 +1,10 @@
 from aiogram import Router
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message, ErrorEvent
+from aiogram.types import Message, ErrorEvent, ReplyKeyboardRemove
 from aiogram import F
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import ExceptionTypeFilter
+from keyboards.reply import keyboard
 from exceptions.base import ApplicationException
 from containers.factories import get_container
 from handlers.converters.chats import convert_chats_dtos_to_message
@@ -37,7 +38,7 @@ async def set_chat_handler(
     message: Message, command: CommandObject, state: FSMContext
 ) -> None:
     if not command.args:
-        await message.answer("Please provide a chat OID. Usage: /set_chat <chat_oid>")
+        await message.answer("Please provide a chat OID. Usage: /set_chat chat_oid")
         return
 
     container = get_container()
@@ -53,23 +54,40 @@ async def set_chat_handler(
             await message.answer(f"Error setting up chat listener: {str(e)}")
             return
 
-        await message.answer(f"Successfully listening to the chat: {chat_oid}")
+        await state.update_data(chat_oid=chat_oid) # СОХРАНИЛИ CHAT_OID В КОНТЕКСТ
+        # TODO Сделать чтобы можно было повторно подключаться к чатам
+
+        await message.answer("Вы в чате. Чтобы выйти, нажмите кнопку.", reply_markup=keyboard)
         await state.set_state(ChatStates.listening)
 
 
 @router.message(ChatStates.listening)
 async def handle_listening_messages(message: Message, state: FSMContext):
-    await message.answer(f"Message sent: {message.text}")
+    user_data = await state.get_data()
+    chat_oid = user_data.get('chat_oid')
+
+    container = get_container()
+    async with container() as request_container:
+        service: BaseChatWebService = await request_container.get(BaseChatWebService)
+
+        if message.text == 'exit':
+            await service.delete_listener(telegram_chat_id=message.chat.id, chat_oid=chat_oid)
+            await message.answer("Вы вышли из чата", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(Command("exit_chat"))
-async def exit_chat_handler(message: Message, state: FSMContext) -> None:
-    current_state = await state.get_state()
-    if current_state != ChatStates.listening:
-        await message.answer("You are not currently in chat listening mode.")
-        return
-    await state.clear()
-    await message.answer("Exited chat listening mode.")
+            await state.clear()
+        else:
+            await message.answer(f"Message sent: {message.text} to {chat_oid}")
+
+
+# @router.message(Command("exit_chat"))
+# async def exit_chat_handler(message: Message, state: FSMContext) -> None:
+#     current_state = await state.get_state()
+#     if current_state != ChatStates.listening:
+#         await message.answer("You are not currently in chat listening mode.")
+#         return
+#     await state.clear()
+#     await message.answer("Exited chat listening mode.")
 
 
 @router.error(

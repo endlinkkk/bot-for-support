@@ -18,7 +18,6 @@ def my_commands() -> list[BotCommand]:
         BotCommand(command="start", description="Запустить бота"),
         BotCommand(command="chats", description="Показать все чаты"),
         BotCommand(command="set_chat", description="Установить чат"),
-        BotCommand(command="exit_chat", description="Выйти из чата"),
     ]
 
 

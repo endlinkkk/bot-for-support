@@ -8,6 +8,7 @@ from exceptions.chats import (
     ChatInfoRequestError,
     ChatListRequestError,
     ListenerAddRequestError,
+    ListenerDeleteRequestError,
     ListenerListRequestError,
 )
 from handlers.converters.chats import convert_chat_listener_response_to_listener_dto
@@ -17,6 +18,7 @@ from services.constants import (
     CHAT_LISTENERS_URI,
     DEFAULT_LIMIT,
     DEFAULT_OFFSET,
+    DELETE_LISTENER_URI,
 )
 from services.converters.chats import convert_chat_response_to_chat_dto
 
@@ -37,6 +39,9 @@ class BaseChatWebService(ABC):
 
     @abstractmethod
     async def get_chat_info(self, chat_oid: str) -> ChatListenerDTO: ...
+
+    @abstractmethod
+    async def delete_listener(self, telegram_chat_id: str, chat_oid: str): ...
 
 
 @dataclass
@@ -106,3 +111,16 @@ class ChatWebService(BaseChatWebService):
             )
 
         return convert_chat_response_to_chat_dto(chat_data=response.json())
+    
+
+    async def delete_listener(self, telegram_chat_id: int, chat_oid: str):
+        response = await self.http_client.delete(
+            url=urljoin(
+                base=self.base_url, url=DELETE_LISTENER_URI.format(chat_oid=chat_oid, telegram_chat_id=telegram_chat_id)
+            ),
+        )
+        if not response.is_success:
+            raise ListenerDeleteRequestError(
+                status_code=response.status_code,
+                response_content=response.content.decode(),
+            )

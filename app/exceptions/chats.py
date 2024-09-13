@@ -41,3 +41,14 @@ class ChatInfoRequestError(ApplicationException):
     @property
     def message(self):
         return "Failed to get chat information"
+
+
+
+@dataclass(eq=False)
+class ListenerDeleteRequestError(ApplicationException):
+    status_code: int
+    response_content: str
+
+    @property
+    def message(self):
+        return "Failed to delete chat listeners"
